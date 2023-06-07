@@ -5,16 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <!-- GOOGLE-FONTS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- GOOGLE-FONTS -->    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
+   
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
     <title>Gigs4You</title>
     
 </head>
@@ -27,7 +28,7 @@
             <form class="search-form">
                 <input class="search-input" type="text" name="search" placeholder="Search by Artist..." />
                 <button class="search-button" type="submit">
-                    <img src="./assets/search.png">
+                    <img class="search-icon" src="./assets/search.png">
                 </button>
             </form>
             <a class="link" href="./pages/login.html">
@@ -36,14 +37,14 @@
             
         </nav>
         
-        <h1 class="title">The Music Era Is To Live It</h1>
+        <h1 class="title">Feel it <br> Sing it <br> Live it </h1>
     </header>
     <main>
         <section class="near-container">
             <article class="near-article">
                 <p>Near Me:</p>
                 <article class="near-shows">
-
+                    <div id="map"></div>
                 </article>
             </article>
         </section>
@@ -53,7 +54,7 @@
         <p>Contact: gigs4you@gmail.com</p>
         <p>Contact: gigs4you@gmail.com</p>
     </footer>
-
-    <script src="script.js"></script>
+    <script src="./pages/geohash.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
