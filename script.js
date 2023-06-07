@@ -1,6 +1,4 @@
-// require('dotenv').config()
-// console.log(process.env)
-// let apiKey = 27001573dbbdf01ffd59704afe2affc0;
+
 
 ///////FIREBASE////////
 // const firebaseConfig = {
@@ -11,37 +9,76 @@
 //   messagingSenderId: "234793920048",
 //   appId: "1:234793920048:web:7a539e64bcb5cad25eeff5"
 // };
-// const app = initializeApp(firebaseConfig);
-// const db = firebase.firestore();
 
+
+let apiKey = "3mcHQ8GGejobOG8uBb1HpEUCrwQ32w0a";
+let geoPoint;
 
 ///////Peticion API de la info que me interesa///////
-async function fetchEvents(artistName) {
+async function fetchEvents() {
     try {
-      let response = await fetch( `https://rest.bandsintown.com/artists/${artistName}/events/?app_id=27001573dbbdf01ffd59704afe2affc0`);
+      let response = await fetch( `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${apiKey}&geoPoint=${geoPoint}`);
       let data = await response.json();
-      let events = data.map(event => ({
-        lineup: event.lineup,
-        datetime: event.datetime,
-        venue: {
-          location: event.venue.location,
-          name: event.venue.name,
-          latitude: event.venue.latitude,
-          longitude: event.venue.longitude,
-          street_address: event.venue.street_address,
-          city: event.venue.city,
-          country: event.venue.country
-        },
-        offers: event.offers.map(offer => ({
-          status: offer.status,
-          type: offer.type
-        }))
-      }));
-      console.log(events)
-      return events;
-  
+      let events = data._embedded.events;
+      let objInfo = [];
+
+      events.forEach(event => {
+        let eventObj = {
+          name: event.name,
+          dateTime: event.dates.start.localDate,
+          priceRanges: event.priceRanges,
+          accessibility: event.accessibility,
+          venueName: event._embedded.venues[0].name,
+          venuePostalCode: event._embedded.venues[0].postalCode,
+          venueLocation: event._embedded.venues[0].location,
+          venueAddress: event._embedded.venues[0].address,
+          images: event.images.map(image => image.url)
+        };
+        objInfo.push(eventObj);
+      });
+      console.log(objInfo);
     } catch (error) {
-      console.log('Error:', error);
+        console.log('Error:', error);
     }
+}
+fetchEvents(geoPoint);
+
+///////GEOLOCALIZACION///////
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(position => {
+    let latitude = position.coords.latitude;
+    let longitude = position.coords.longitude;
+    geoPoint = encodeGeoHash(latitude, longitude).slice(0, 9);
+    console.log(geoPoint)
+    fetchEvents(geoPoint);
+
+    ///////MAPA///////
+    var map = L.map('map').setView([latitude, longitude], 13);
+
+    var Jawg_Matrix = L.tileLayer('https://{s}.tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+    attribution: '<a href="http://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    minZoom: 0,
+    maxZoom: 22,
+    subdomains: 'abcd',
+    accessToken: 'bBSSN2ijAIV8SRhPOa1TiWG0tZVJDj5WP5gzhvq5fECKjQETnbRuUDsjTJmFwTt6'
+    }).addTo(map);
+    }, error => {
+    console.log('Error obtaining geolocation:', error);
+    });
+  } else {
+    console.log('Geolocation is not supported by this browser.');
   }
-fetchEvents('Metallica');
+
+
+
+
+///////SEARCH INPUT///////
+// function toggleSearchInput() {
+//   let searchInput = document.querySelector('.search-input input');
+//   searchInput.classList.toggle('show-search-input');
+// }
+// let searchButton = document.querySelector('.search-button');
+// searchButton.addEventListener('click', toggleSearchInput);
+
+
+
