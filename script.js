@@ -12,14 +12,15 @@
 
 
 let apiKey = "3mcHQ8GGejobOG8uBb1HpEUCrwQ32w0a";
+let events;
 let geoPoint;
 
 ///////Peticion API de la info que me interesa///////
 async function fetchEvents() {
     try {
-      let response = await fetch( `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${apiKey}&geoPoint=${geoPoint}`);
+      let response = await fetch( `https://app.ticketmaster.com/discovery/v2/events.json?&size=100&apikey=${apiKey}&geoPoint=${geoPoint}`);
       let data = await response.json();
-      let events = data._embedded.events;
+      events = data._embedded.events;
       let objInfo = [];
 
       events.forEach(event => {
@@ -41,7 +42,7 @@ async function fetchEvents() {
         console.log('Error:', error);
     }
 }
-fetchEvents(geoPoint);
+// fetchEvents();
 
 ///////GEOLOCALIZACION///////
 if (navigator.geolocation) {
@@ -70,7 +71,75 @@ if (navigator.geolocation) {
   }
 
 
+///////MARCADORES Y POP UP///////
 
+async function printMarkersPopUp() {
+  try {
+    let response = await fetchEvents();
+    let markerAll = [];
+    let myLayer;
+
+    response.forEach(event => {
+      let eventLatitude = event.venueLocation.latitude;
+      let eventLongitude = event.venueLocation.longitude;
+
+      let marker = L.marker([eventLatitude, eventLongitude]);
+
+      markerAll.push(marker);
+
+      const popupContent = `
+        <h3>${event.name}</h3>
+        <p>Date: ${event.dateTime}</p>
+        <p>Price Range: ${event.priceRanges}</p>
+        <p>Accessibility: ${event.accessibility}</p>
+        <p>Venue: ${event.venueName}</p>
+        <p>Postal Code: ${event.venuePostalCode}</p>
+        <p>Address: ${event.venueAddress}</p>`;
+
+      marker.bindPopup(popupContent);
+
+    });
+
+    myLayer = L.layerGroup(markerAll).addTo(map);
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
+
+printMarkersPopUp();
+
+
+
+
+
+
+
+
+// function printMarker() {56
+//   fetch('https://api.metro.net/LACMTA_Rail/vehicle_positions/all?geojson=false')
+//   .then(res=>res.json())
+//   .then(data=> {
+//       // creo tanto el array de 'markers' como la 'layer group' fuera del bucle para 
+//       let markerAll = [];
+//       let myLayer;
+//       data.forEach((element, i) => {
+//           // declaro variables que usaré en los marcadores y pop ups
+//           const latitude = element.position.latitude;
+//           const longitude = element.position.longitude;
+//           const id = element.vehicle.vehicle_id;
+//           // declaro marcador
+//           var marker = L.marker([latitude, longitude]);
+//           // añado marcadores mediante array a la capa
+//           markerAll.push(marker);
+//           myLayer = L.layerGroup(markerAll).addTo(map2);
+//           // añado popup al evento click
+//           marker.addEventListener("click", function() {
+//               var popup = L.popup()
+//                   .setLatLng([latitude, longitude])
+//                   .setContent(id)
+//                   .openOn(map2);
+//           });
+//       });
 
 ///////SEARCH INPUT///////
 // function toggleSearchInput() {
