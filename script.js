@@ -22,18 +22,21 @@ async function fetchEvents() {
       let data = await response.json();
       events = data._embedded.events;
       events.forEach(event => {
-        let eventObj = {
-          name: event.name,
-          dateTime: event.dates.start.localDate,
-          priceRanges: event.priceRanges,
-          accessibility: event.accessibility,
-          venueName: event._embedded.venues[0].name,
-          venuePostalCode: event._embedded.venues[0].postalCode,
-          venueLocation: event._embedded.venues[0].location,
-          venueAddress: event._embedded.venues[0].address,
-          images: event.images.map(image => image.url)
-        };
+        let artistName = event._embedded.attractions[0].name;
+        if (!objInfo.filter(item => item.name === artistName).length) {
+          let eventObj = {
+            name: artistName,
+            dateTime: event.dates.start.localDate,
+            priceRanges: event.priceRanges,
+            accessibility: event.accessibility,
+            venueName: event._embedded.venues[0].name,
+            venuePostalCode: event._embedded.venues[0].postalCode,
+            venueLocation: event._embedded.venues[0].location,
+            venueAddress: event._embedded.venues[0].address,
+            images: event.images.map(image => image.url)
+          };
         objInfo.push(eventObj);
+        }
       });
       console.log(objInfo);
       
@@ -71,11 +74,10 @@ if (navigator.geolocation) {
     });
   } else {
     console.log('Geolocation is not supported by this browser.');
-  }
+}
 
 
 ///////MARCADORES Y POP UP///////
-
 function printMarkersPopUp() {
     // let markerAll = [];
     // let myLayer;
@@ -103,50 +105,35 @@ function printMarkersPopUp() {
       
     });
   //  L.layerGroup(markerAll).addTo(map);
+}
+
+function handleFilter() {
+  let fromDate = document.getElementById('date-from').value;
+  let toDate = document.getElementById('date-to').value;
+  if (fromDate && toDate) {
+    let filteredEvents = objInfo.filter(event => {
+      let eventDate = event.dateTime;
+      return eventDate >= fromDate && eventDate <= toDate;
+      ///borrar los marcadores y pop ups y que me vuelvan a aparecer en el mapa??
+      //problema de asincronia otra vez con el objInfo??
+    });
   }
+}
 
+///////HIDE AND SHOW MAP///////
+let selectButton = document.querySelector('.button-discover');
+let selectTitle = document.querySelector('.title');
+let selectSection = document.querySelector('.hide-container');
+let selectBody= document.querySelector('body');
+
+selectButton.addEventListener('click', function() {
+  selectSection.style.display = 'block';   
+  selectTitle.style.display = 'none';  
+  selectBody.style.backgroundColor = '#000000';  
+});
   
-  
 
 
-
-
-
-
-
-// function printMarker() {56
-//   fetch('https://api.metro.net/LACMTA_Rail/vehicle_positions/all?geojson=false')
-//   .then(res=>res.json())
-//   .then(data=> {
-//       // creo tanto el array de 'markers' como la 'layer group' fuera del bucle para 
-//       let markerAll = [];
-//       let myLayer;
-//       data.forEach((element, i) => {
-//           // declaro variables que usaré en los marcadores y pop ups
-//           const latitude = element.position.latitude;
-//           const longitude = element.position.longitude;
-//           const id = element.vehicle.vehicle_id;
-//           // declaro marcador
-//           var marker = L.marker([latitude, longitude]);
-//           // añado marcadores mediante array a la capa
-//           markerAll.push(marker);
-//           myLayer = L.layerGroup(markerAll).addTo(map2);
-//           // añado popup al evento click
-//           marker.addEventListener("click", function() {
-//               var popup = L.popup()
-//                   .setLatLng([latitude, longitude])
-//                   .setContent(id)
-//                   .openOn(map2);
-//           });
-//       });
-
-///////SEARCH INPUT///////
-// function toggleSearchInput() {
-//   let searchInput = document.querySelector('.search-input input');
-//   searchInput.classList.toggle('show-search-input');
-// }
-// let searchButton = document.querySelector('.search-button');
-// searchButton.addEventListener('click', toggleSearchInput);
 
 
 

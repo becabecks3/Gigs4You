@@ -7,19 +7,6 @@
     --white: #ffffff;
 }
 body {
-    background-color: var(--black);
-}
-
-
-/* footer{
-    background-color: var(--black);
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-} */
-.header-container{
     background-image: url(./assets/show2.jpg);
     background-size: cover;
     background-position: center;
@@ -45,60 +32,69 @@ body {
     height: 40px;
     width: 40px; 
 }
-.search-form{
-    display: flex;
-    flex-direction: row;
-    justify-content:center;
-    align-items: center;
-}
-.search-input{
-    border-radius: 10px;
-    height: 30px;
-    width: 150px;    
-    border: none;
-    display: none;
-}
-.show-search-input .search-input {
-    display: block;
-}
-
-.search-button img{
-    height: 30px;
-    width: 30px;
-}
-.search-button{
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-}
 .title{
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     text-align: center;
     font-size: 90px;
-    height: 560px;
+    height: 500px;
     padding: 15px 25px;
     font-family: Anton, times, serif;
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: 650;
     /* color: #ffffff; */
     color: #1BE1A2;
 }
+.button-discover{
+    margin-top: 20px;
+    height: 70px;
+    width: 230px;
+    border-radius: 10px;
+    font-size: 25px;
+    text-transform: uppercase;
+    font-family: Anton, times, serif;
+    letter-spacing: 3px;
+    background-color:rgba(0,0,0,0.9);
+    color: #1BE1A2;
+    border: none;
+    box-shadow: 0px 0px 3px rgba(27, 225, 162, 0.4) ;
+}
 .logo{
-    height: 100px;
-    width: 100px;
+    height: 85px;
+    width: 85px;
 }
 
-.near-container{
-    height: 100%;
-    color: var(--white);
+#map {
+    width: 100%;
+    height: 550px;
+}
+.hide-container{
+    display: none;
 }
 
-.near-shows{
-    color: white;
+.map-section {
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content:flex-start;
+    align-items: center;
 }
-
-#map{ 
-    height: 400px; 
+.filter-section{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 10px;
+    font-size: 25px;
+    font-family: Anton, times, serif;
+}
+.filter-section input {
+    margin-right: 10px;
+}
+.filter-section label{
+    margin-right: 10px;
 }
