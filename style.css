@@ -1,5 +1,6 @@
 *{
     margin: 0;
+    padding: 0;
 }
 
 :root{
@@ -44,7 +45,6 @@ body {
     font-family: Anton, times, serif;
     text-transform: uppercase;
     font-weight: 650;
-    /* color: #ffffff; */
     color: #1BE1A2;
 }
 .button-discover{
@@ -97,4 +97,15 @@ body {
 }
 .filter-section label{
     margin-right: 10px;
+}
+.footer-container{
+    background-color: var(--black);
+    font-size: 20px;
+    color:#1BE1A2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Anton, times, serif;
+    height: 100px;
+    margin-top: 120px;
 }

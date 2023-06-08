@@ -13,6 +13,7 @@
 
 let apiKey = "3mcHQ8GGejobOG8uBb1HpEUCrwQ32w0a";
 let events;
+let geoPoint;
 let objInfo = [];
 
 ///////Peticion API de la info que me interesa///////
@@ -39,86 +40,78 @@ async function fetchEvents() {
         }
       });
       console.log(objInfo);
-      
     } catch (error) {
         console.log('Error:', error);
     }
 }
-// fetchEvents();
 
-///////GEOLOCALIZACION///////
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(position => {
-    let latitude = position.coords.latitude;
-    let longitude = position.coords.longitude;
-    geoPoint = encodeGeoHash(latitude, longitude).slice(0, 9);
-    
-    ///////MAPA///////
-    var map = L.map('map').setView([latitude, longitude], 13);
-  //   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  //     maxZoom: 19,
-  //     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  // }).addTo(map);
-    var Jawg_Matrix = L.tileLayer('https://{s}.tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
-    attribution: '<a href="http://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    minZoom: 0,
-    maxZoom: 22,
-    subdomains: 'abcd',
-    accessToken: 'bBSSN2ijAIV8SRhPOa1TiWG0tZVJDj5WP5gzhvq5fECKjQETnbRuUDsjTJmFwTt6'
-    }).addTo(map);
-    
-    fetchEvents(geoPoint);
-    printMarkersPopUp()
+function geolocateAndPrintMap() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+      let latitude = position.coords.latitude;
+      let longitude = position.coords.longitude;
+      geoPoint = encodeGeoHash(latitude, longitude).slice(0, 9);
+
+      var map = L.map('map').setView([latitude, longitude], 13);
+      var Jawg_Matrix = L.tileLayer('https://{s}.tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+        attribution: '<a href="http://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        minZoom: 0,
+        maxZoom: 22,
+        subdomains: 'abcd',
+        accessToken: 'bBSSN2ijAIV8SRhPOa1TiWG0tZVJDj5WP5gzhvq5fECKjQETnbRuUDsjTJmFwTt6'
+      }).addTo(map);
+
+      
+      fetchEvents(geoPoint)
+                          .then(() => {
+                            let markerAll = [];
+                            let myLayer;
+
+                            objInfo.forEach(event => {
+                              let eventLatitude = event.venueLocation.latitude;
+                              let eventLongitude = event.venueLocation.longitude;
+                              let marker = L.marker([eventLatitude, eventLongitude]);
+
+                              markerAll.push(marker);
+
+                              const popupContent = `
+                                <h3>${event.name}</h3>
+                                <p>Date: ${event.dateTime}</p>
+                                <p>Price Range: ${event.priceRanges}</p>
+                                <p>Accessibility: ${event.accessibility}</p>
+                                <p>Venue: ${event.venueName}</p>
+                                <p>Postal Code: ${event.venuePostalCode}</p>
+                                <p>Address: ${event.venueAddress}</p>`;
+
+                              marker.bindPopup(popupContent);
+                            });
+
+                              myLayer = L.layerGroup(markerAll).addTo(map);
+                            })
+                            .catch(error => {
+                              console.log('Error fetching events:', error);
+                            });
   }, error => {
     console.log('Error obtaining geolocation:', error);
-    });
-  } else {
-    console.log('Geolocation is not supported by this browser.');
+  });
+} else {
+  console.log('Geolocation is not supported by this browser.');
 }
-
-
-///////MARCADORES Y POP UP///////
-function printMarkersPopUp() {
-    // let markerAll = [];
-    // let myLayer;
-
-    objInfo.forEach(event => {
-      let eventLatitude = event.venueLocation.latitude;
-      let eventLongitude = event.venueLocation.longitude;
-      console.log(eventLatitude);
-      console.log(eventLongitude);
-      let marker = L.marker([eventLatitude, eventLongitude]);
-
-      // markerAll.push(marker);
-
-      const popupContent = `
-        <h3>${event.name}</h3>
-        <p>Date: ${event.dateTime}</p>
-        <p>Price Range: ${event.priceRanges}</p>
-        <p>Accessibility: ${event.accessibility}</p>
-        <p>Venue: ${event.venueName}</p>
-        <p>Postal Code: ${event.venuePostalCode}</p>
-        <p>Address: ${event.venueAddress}</p>`;
-
-      marker.bindPopup(popupContent);
-      marker.addTo(map);
-      
-    });
-  //  L.layerGroup(markerAll).addTo(map);
 }
+geolocateAndPrintMap();
 
-function handleFilter() {
-  let fromDate = document.getElementById('date-from').value;
-  let toDate = document.getElementById('date-to').value;
-  if (fromDate && toDate) {
-    let filteredEvents = objInfo.filter(event => {
-      let eventDate = event.dateTime;
-      return eventDate >= fromDate && eventDate <= toDate;
-      ///borrar los marcadores y pop ups y que me vuelvan a aparecer en el mapa??
-      //problema de asincronia otra vez con el objInfo??
-    });
-  }
-}
+// function handleFilter() {
+//   let fromDate = document.getElementById('date-from').value;
+//   let toDate = document.getElementById('date-to').value;
+//   if (fromDate && toDate) {
+//     let filteredEvents = objInfo.filter(event => {
+//       let eventDate = event.dateTime;
+//       return eventDate >= fromDate && eventDate <= toDate;
+//       ///borrar los marcadores y pop ups y que me vuelvan a aparecer en el mapa??
+//       //problema de asincronia otra vez con el objInfo??
+//     });
+//   }
+// }
 
 ///////HIDE AND SHOW MAP///////
 let selectButton = document.querySelector('.button-discover');
@@ -136,4 +129,63 @@ selectButton.addEventListener('click', function() {
 
 
 
+///////GEOLOCALIZACION///////
+// function getGeolocation(){
+//   if (navigator.geolocation) {
+//     navigator.geolocation.getCurrentPosition(position => {
+//       let latitude = position.coords.latitude;
+//       let longitude = position.coords.longitude;
+//       geoPoint = encodeGeoHash(latitude, longitude).slice(0, 9);
+      
+//       ///////MAPA///////
+//       var map = L.map('map').setView([latitude, longitude], 13);
+//       var Jawg_Matrix = L.tileLayer('https://{s}.tile.jawg.io/jawg-matrix/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+//       attribution: '<a href="http://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+//       minZoom: 0,
+//       maxZoom: 22,
+//       subdomains: 'abcd',
+//       accessToken: 'bBSSN2ijAIV8SRhPOa1TiWG0tZVJDj5WP5gzhvq5fECKjQETnbRuUDsjTJmFwTt6'
+//       }).addTo(map);
+      
+//       fetchEvents(geoPoint);
+//       printMarkersPopUp(map);
+//     }, error => {
+//       console.log('Error obtaining geolocation:', error);
+//       });
+//     } else {
+//       console.log('Geolocation is not supported by this browser.');
+//   }
+// }
+
+
+
+// ///////MARCADORES Y POP UP///////
+// function printMarkersPopUp(map) {
+//     let markerAll = [];
+//     let myLayer;
+
+//     objInfo.forEach(event => {
+//       let eventLatitude = event.venueLocation.latitude;
+//       let eventLongitude = event.venueLocation.longitude;
+//       console.log(eventLatitude);
+//       console.log(eventLongitude);
+//       let marker = L.marker([eventLatitude, eventLongitude]);
+
+//       markerAll.push(marker);
+
+//       const popupContent = `
+//         <h3>${event.name}</h3>
+//         <p>Date: ${event.dateTime}</p>
+//         <p>Price Range: ${event.priceRanges}</p>
+//         <p>Accessibility: ${event.accessibility}</p>
+//         <p>Venue: ${event.venueName}</p>
+//         <p>Postal Code: ${event.venuePostalCode}</p>
+//         <p>Address: ${event.venueAddress}</p>`;
+
+//       marker.bindPopup(popupContent);
+//       // marker.addTo(map);
+      
+//     });
+//     myLayer = L.layerGroup(markerAll).addTo(map);
+// }
 
