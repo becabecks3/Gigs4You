@@ -19,7 +19,7 @@ let objInfo = [];
 ///////Peticion API de la info que me interesa///////
 async function fetchEvents() {
     try {     
-      let response = await fetch( `https://app.ticketmaster.com/discovery/v2/events.json?&size=100&apikey=${apiKey}&geoPoint=${geoPoint}`);
+      let response = await fetch( `https://app.ticketmaster.com/discovery/v2/events.json?&size=200&apikey=${apiKey}&geoPoint=${geoPoint}&radius=100&unit=km`);
       let data = await response.json();
       events = data._embedded.events;
       events.forEach(event => {
@@ -28,13 +28,11 @@ async function fetchEvents() {
           let eventObj = {
             name: artistName,
             dateTime: event.dates.start.localDate,
-            priceRanges: event.priceRanges,
-            accessibility: event.accessibility,
+            price: event.priceRanges[0].min,
             venueName: event._embedded.venues[0].name,
-            venuePostalCode: event._embedded.venues[0].postalCode,
             venueLocation: event._embedded.venues[0].location,
-            venueAddress: event._embedded.venues[0].address,
-            images: event.images.map(image => image.url)
+            venueAddress: event._embedded.venues[0].address.line1,
+            tickets: event.url
           };
         objInfo.push(eventObj);
         }
@@ -70,20 +68,35 @@ function geolocateAndPrintMap() {
                             objInfo.forEach(event => {
                               let eventLatitude = event.venueLocation.latitude;
                               let eventLongitude = event.venueLocation.longitude;
-                              let marker = L.marker([eventLatitude, eventLongitude]);
+                              let marker = L.marker([eventLatitude, eventLongitude], {
+                                icon: L.icon({
+                                  iconUrl: './assets/pin.png',
+                                  iconSize: [45, 50], 
+                                  iconAnchor: [12, 41], 
+                                  popupAnchor: [1, -34] 
+                                })
+                              });
 
                               markerAll.push(marker);
 
                               const popupContent = `
+                                <section>
                                 <h3>${event.name}</h3>
                                 <p>Date: ${event.dateTime}</p>
-                                <p>Price Range: ${event.priceRanges}</p>
-                                <p>Accessibility: ${event.accessibility}</p>
                                 <p>Venue: ${event.venueName}</p>
-                                <p>Postal Code: ${event.venuePostalCode}</p>
-                                <p>Address: ${event.venueAddress}</p>`;
+                                <p>Address: ${event.venueAddress}</p>
+                                <p>Prices From: ${event.price}€</p>
+                                <a "href="${event.tickets}">Buy Tickets</a>
+                                </section>`;
 
-                              marker.bindPopup(popupContent);
+                                var customOptions =
+                                {
+                                'maxWidth': '400',
+                                'width': '200',
+                                'className' : 'popupCustom'
+                                }
+                              
+                              marker.bindPopup(popupContent, customOptions);
                             });
 
                               myLayer = L.layerGroup(markerAll).addTo(map);
